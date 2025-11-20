@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>سامانه اهدای عضو</title>
+    
+    <!-- Vazirmatn Font (Farsi Digits) -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/misc/Farsi-Digits/font-face.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Robust Storage Shim for Sandboxed Environments -->
+    <script>
+      (function() {
+        function shimStorage(propName) {
+          try {
+            // Try to access the property to check if it throws
+            var test = window[propName];
+            // Try to use it
+            test.getItem('__test__');
+            test.removeItem('__test__');
+          } catch (e) {
+            console.warn('Storage access restricted, applying shim for ' + propName);
+            
+            var storageMock = {
+              getItem: function() { return null; },
+              setItem: function() { },
+              removeItem: function() { },
+              clear: function() { },
+              length: 0,
+              key: function() { return null; }
+            };
+            
+            try {
+              // Attempt to delete the restricted property first
+              // (This often fixes issues where defineProperty fails on existing props)
+              try { delete window[propName]; } catch(ignore) {}
+              
+              Object.defineProperty(window, propName, {
+                value: storageMock,
+                writable: true,
+                configurable: true,
+                enumerable: true
+              });
+            } catch (err) {
+              console.warn('Failed to shim ' + propName + ':', err);
+            }
+          }
+        }
+        
+        shimStorage('localStorage');
+        shimStorage('sessionStorage');
+      })();
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Vazirmatn', 'sans-serif'],
+            },
+            colors: {
+              primary: {
+                50: '#f0f9ff',
+                100: '#e0f2fe',
+                500: '#0ea5e9',
+                600: '#0284c7',
+                700: '#0369a1',
+              },
+              secondary: {
+                500: '#64748b',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+     
+    <style>
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #475569;
+      }
+      /* Hide scrollbar for mobile horizontal scrolling */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
+    "recharts": "https://aistudiocdn.com/recharts@^3.4.1",
+    "leaflet": "https://aistudiocdn.com/leaflet@^1.9.4",
+    "leaflet/": "https://aistudiocdn.com/leaflet@^1.9.4/"
+  }
+}
+</script>
+</head>
+  <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 transition-colors duration-200">
+    <div id="root"></div>
+  </body>
+</html>

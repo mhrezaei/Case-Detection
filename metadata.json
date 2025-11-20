@@ -1,0 +1,9 @@
+{
+  "name": "Organ Donation Manager PWA",
+  "description": "Intelligent system for identifying and managing organ donation cases with offline capabilities.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
