@@ -3,6 +3,7 @@
 
 This project is a **Progressive Web App (PWA)** designed to accelerate, streamline, and automate the process of identifying and managing brain-dead cases for organ donation. This intelligent system empowers inspectors and medical staff to monitor patient statuses with high precision and speed, ensuring timely actions in critical situations.
 
+
 ---
 
 ## 🚀 About the Project
