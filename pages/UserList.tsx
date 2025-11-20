@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { UserStatus, UserRole, User } from '../types';
-import { Search, Filter, CheckCircle, XCircle, Trash2, Edit2, Save, X } from 'lucide-react';
+import { Search, Filter, CheckCircle, XCircle, Trash2, Edit2, Save, X, Building, Calendar, Phone } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
 import Combobox from '../components/Combobox';
 import { toPersianDigits } from '../utils/formatting';
@@ -62,8 +62,35 @@ const UserList: React.FC = () => {
     }
   };
 
+  const renderStatusBadge = (status: UserStatus) => {
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs border ${
+        status === UserStatus.ACTIVE ? 'bg-green-50 text-green-700 border-green-200' :
+        status === UserStatus.PENDING ? 'bg-orange-50 text-orange-700 border-orange-200' :
+        'bg-red-50 text-red-700 border-red-200'
+      }`}>
+        {status === UserStatus.ACTIVE ? 'فعال' : 
+         status === UserStatus.PENDING ? 'در انتظار' : 'مسدود/غیرمجاز'}
+      </span>
+    );
+  };
+
+  const renderActions = (user: User) => (
+    <div className="flex items-center gap-2">
+       <button onClick={() => openEditModal(user)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded bg-blue-50/50 border border-blue-100" title="ویرایش پروفایل"><Edit2 size={16}/></button>
+       {user.status === UserStatus.PENDING ? (
+         <button onClick={() => handleStatusChange(user.id, UserStatus.ACTIVE)} className="p-1.5 text-green-600 hover:bg-green-50 rounded bg-green-50/50 border border-green-100" title="تایید"><CheckCircle size={16}/></button>
+       ) : user.status === UserStatus.ACTIVE ? (
+         <button onClick={() => handleStatusChange(user.id, UserStatus.NOT_WHITELISTED)} className="p-1.5 text-orange-600 hover:bg-orange-50 rounded bg-orange-50/50 border border-orange-100" title="مسدود کردن"><XCircle size={16}/></button>
+       ) : (
+         <button onClick={() => handleStatusChange(user.id, UserStatus.ACTIVE)} className="p-1.5 text-green-600 hover:bg-green-50 rounded bg-green-50/50 border border-green-100" title="فعال سازی"><CheckCircle size={16}/></button>
+       )}
+       <button onClick={() => setDeleteId(user.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded bg-red-50/50 border border-red-100" title="حذف"><Trash2 size={16}/></button>
+    </div>
+  );
+
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6 pb-20 animate-fade-in">
       <h2 className="text-2xl font-bold text-gray-800 dark:text-white">مدیریت کاربران</h2>
 
       <div className="flex flex-col sm:flex-row gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
@@ -91,7 +118,56 @@ const UserList: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+      {/* Mobile Card View */}
+      <div className="grid grid-cols-1 gap-4 md:hidden">
+        {filteredUsers.map(user => (
+          <div key={user.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+             <div className="flex justify-between items-start mb-3">
+                <div className="flex items-center gap-3">
+                   <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold text-sm">
+                      {user.firstName ? user.firstName[0] : 'U'}
+                   </div>
+                   <div>
+                      <p className="font-bold text-gray-800 dark:text-white">{user.firstName} {user.lastName}</p>
+                      <select 
+                        value={user.role} 
+                        onChange={(e) => handleRoleChange(user.id, e.target.value as UserRole)}
+                        className="text-xs bg-transparent border-none outline-none text-gray-500 dark:text-gray-400 mt-0.5 p-0"
+                      >
+                         <option value={UserRole.ADMIN}>مدیر سیستم</option>
+                         <option value={UserRole.INSPECTOR}>بازرس</option>
+                         <option value={UserRole.STAFF}>پرسنل</option>
+                      </select>
+                   </div>
+                </div>
+                {renderStatusBadge(user.status)}
+             </div>
+             
+             <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
+                <div className="flex items-center gap-2">
+                   <Phone size={14} className="text-gray-400" />
+                   <span className="font-mono">{toPersianDigits(user.mobile)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                   <Building size={14} className="text-gray-400" />
+                   <span className="truncate">{getHospitalName(user.workplaceId)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                   <Calendar size={14} className="text-gray-400" />
+                   <span>{toPersianDigits(user.registrationDate || '-')}</span>
+                </div>
+             </div>
+
+             <div className="border-t dark:border-gray-700 pt-3 flex justify-between items-center">
+                <span className="text-xs text-gray-400">عملیات:</span>
+                {renderActions(user)}
+             </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-right whitespace-nowrap">
             <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-200 text-xs uppercase">
@@ -136,26 +212,11 @@ const UserList: React.FC = () => {
                     {toPersianDigits(user.registrationDate || '-')}
                   </td>
                   <td className="p-4">
-                    <span className={`px-2 py-1 rounded-full text-xs border ${
-                      user.status === UserStatus.ACTIVE ? 'bg-green-50 text-green-700 border-green-200' :
-                      user.status === UserStatus.PENDING ? 'bg-orange-50 text-orange-700 border-orange-200' :
-                      'bg-red-50 text-red-700 border-red-200'
-                    }`}>
-                      {user.status === UserStatus.ACTIVE ? 'فعال' : 
-                       user.status === UserStatus.PENDING ? 'در انتظار' : 'مسدود/غیرمجاز'}
-                    </span>
+                    {renderStatusBadge(user.status)}
                   </td>
                   <td className="p-4">
-                    <div className="flex justify-center gap-2">
-                       <button onClick={() => openEditModal(user)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" title="ویرایش پروفایل"><Edit2 size={18}/></button>
-                       {user.status === UserStatus.PENDING ? (
-                         <button onClick={() => handleStatusChange(user.id, UserStatus.ACTIVE)} className="p-1.5 text-green-600 hover:bg-green-50 rounded" title="تایید"><CheckCircle size={18}/></button>
-                       ) : user.status === UserStatus.ACTIVE ? (
-                         <button onClick={() => handleStatusChange(user.id, UserStatus.NOT_WHITELISTED)} className="p-1.5 text-orange-600 hover:bg-orange-50 rounded" title="مسدود کردن"><XCircle size={18}/></button>
-                       ) : (
-                         <button onClick={() => handleStatusChange(user.id, UserStatus.ACTIVE)} className="p-1.5 text-green-600 hover:bg-green-50 rounded" title="فعال سازی"><CheckCircle size={18}/></button>
-                       )}
-                       <button onClick={() => setDeleteId(user.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded" title="حذف"><Trash2 size={18}/></button>
+                    <div className="flex justify-center">
+                       {renderActions(user)}
                     </div>
                   </td>
                 </tr>
